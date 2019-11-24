@@ -1,0 +1,2 @@
+EMULATION = 'Assault-ram-v0'
+NUM_EPISODES = 1000
