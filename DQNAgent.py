@@ -64,3 +64,12 @@ class DQNAgent:
 
         temp = self.model.predict(s_batch)
         print()
+
+    def save_network(self, path):
+        # Saves model at specified path as h5 file
+        self.model.save(path)
+        print("Successfully saved network.")
+
+    def load_network(self, path):
+        self.model.load_weights(path)
+        print("Succesfully loaded network.")
