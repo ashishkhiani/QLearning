@@ -1,4 +1,4 @@
-class DoubleDQN:
+class DoubleDQNAgent:
     """
     Double Deep Q-Networks
     """
