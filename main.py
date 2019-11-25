@@ -1,14 +1,12 @@
 import gym
 
-from DQN import DQN
-from ReplayBuffer import ReplayBuffer
-from parameters import EMULATION, NUM_EPISODES, REPLAY_BUFFER_CAPACITY, NUM_TIME_STEPS, REPLAY_BUFFER_SAMPLING_SIZE
+from DQNAgent import DQNAgent
+from parameters import EMULATION, NUM_EPISODES, NUM_TIME_STEPS
 
 
 def train_model_using_dqn(show_emulation=False):
-    replay_buffer = ReplayBuffer(capacity=REPLAY_BUFFER_CAPACITY)
     env = gym.make(EMULATION)
-    dqn = DQN(env.observation_space, env.action_space)
+    agent = DQNAgent(env.observation_space, env.action_space)
 
     for i in range(NUM_EPISODES):
         current_state = env.reset()
@@ -17,7 +15,7 @@ def train_model_using_dqn(show_emulation=False):
                 env.render()
 
             # Select an action via explore or exploit
-            action = dqn.get_action()
+            action = agent.get_action()
 
             # Execute selected action
             next_state, reward, done, info = env.step(action)
@@ -26,11 +24,11 @@ def train_model_using_dqn(show_emulation=False):
 
             # Store experience in replay buffer
             experience = (current_state, action, reward, next_state)
-            replay_buffer.add(experience)
+            agent.remember(experience)
 
-            # Sample batch from replay buffer
-            if replay_buffer.can_sample(REPLAY_BUFFER_SAMPLING_SIZE):
-                batch = replay_buffer.sample(REPLAY_BUFFER_SAMPLING_SIZE)
+            next_state = current_state
+
+            agent.replay()
 
             # TODO Train Network with random sample
 
@@ -38,10 +36,8 @@ def train_model_using_dqn(show_emulation=False):
 
             # TODO do something with gradient descent and loss
 
-
-
-
-
+        # decay epsilon at the end of every episode
+        agent.decay_epsilon()
 
     env.close()
 
