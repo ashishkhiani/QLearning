@@ -9,6 +9,7 @@ def train_model_using_dqn(show_emulation=False):
     agent = DQNAgent(env.observation_space, env.action_space)
 
     for i in range(NUM_EPISODES):
+        print(f'Episode {i}')
         current_state = env.reset()
         for _ in range(NUM_TIME_STEPS):
             if show_emulation:
@@ -23,14 +24,15 @@ def train_model_using_dqn(show_emulation=False):
             # TODO handle done case
 
             # Store experience in replay buffer
-            experience = (current_state, action, reward, next_state)
+            experience = (current_state, action, reward, next_state, done)
             agent.remember(experience)
 
-            next_state = current_state
+            current_state = next_state
 
-            agent.replay()
+            batch = agent.replay()
 
-            # TODO Train Network with random sample
+            # Train network with random sample
+            agent.learn(batch)
 
             # TODO Calculate loss between output Q-values and target Q-values
 
@@ -43,4 +45,4 @@ def train_model_using_dqn(show_emulation=False):
 
 
 if __name__ == "__main__":
-    train_model_using_dqn(show_emulation=False)
+    train_model_using_dqn(show_emulation=True)
