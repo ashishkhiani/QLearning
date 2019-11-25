@@ -1,4 +1,5 @@
 import gym
+import numpy as np
 
 from DQNAgent import DQNAgent
 from parameters import EMULATION, NUM_EPISODES, NUM_TIME_STEPS
@@ -45,4 +46,4 @@ def train_model_using_dqn(show_emulation=False):
 
 
 if __name__ == "__main__":
-    train_model_using_dqn(show_emulation=True)
+    train_model_using_dqn(show_emulation=False)

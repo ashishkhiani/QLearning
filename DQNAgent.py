@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 from keras import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Flatten
 from keras.optimizers import Adam
 
 from ReplayBuffer import ReplayBuffer
@@ -26,7 +26,7 @@ class DQNAgent:
 
     def _build_model(self):
         model = Sequential()
-        model.add(Dense(24, input_shape=(REPLAY_BUFFER_SAMPLING_SIZE, self.observation_space.shape[0])))
+        model.add(Dense(24, input_shape=self.observation_space.shape))
         model.add(Dense(24, activation='relu'))
         model.add(Dense(self.action_space.n, activation='linear'))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
@@ -57,13 +57,10 @@ class DQNAgent:
             self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay_rate)
 
     def learn(self, batch):
-        for state, action, reward, next_state, done in batch:
-            target = reward
+        if len(batch) == 0:
+            return
 
-            if not done:
-                temp = self.model.predict(next_state)
-                target = reward + self.discount_factor * np.amax(temp[0])
+        s_batch, a_batch, r_batch, s2_batch, d_batch = list(map(np.array, list(zip(*batch))))
 
-            target_f = self.model.predict(state)
-            target_f[0][action] = target
-            self.model.fit(state, target_f, epochs=1, verbose=0)
+        temp = self.model.predict(s_batch)
+        print()
