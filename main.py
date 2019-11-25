@@ -10,6 +10,7 @@ def train_model_using_dqn(show_emulation=False):
     agent = DQNAgent(env.observation_space, env.action_space)
 
     for i in range(NUM_EPISODES):
+        total_reward = 0
         print(f'Episode {i}')
         current_state = env.reset()
         for _ in range(NUM_TIME_STEPS):
@@ -39,8 +40,11 @@ def train_model_using_dqn(show_emulation=False):
 
             # TODO do something with gradient descent and loss
 
+            total_reward += reward
+
         # decay epsilon at the end of every episode
         agent.decay_epsilon()
+        print(total_reward)
 
     env.close()
 

@@ -69,11 +69,7 @@ class DQNAgent:
 
         target_f = self.model.predict(s_batch)
 
-        loss = self.model.train_on_batch(s_batch, target_f)
-
-        if loss > 0:
-            print(loss)
-
+        self.model.fit(s_batch, target_f, epochs=1, verbose=0)
 
     def save_network(self, path):
         # Saves model at specified path as h5 file
