@@ -62,8 +62,18 @@ class DQNAgent:
 
         s_batch, a_batch, r_batch, s2_batch, d_batch = list(map(np.array, list(zip(*batch))))
 
-        temp = self.model.predict(s_batch)
-        print()
+        target = r_batch
+
+        if not d_batch.all():
+            target = r_batch + self.discount_factor * np.amax(self.model.predict(s2_batch))
+
+        target_f = self.model.predict(s_batch)
+
+        loss = self.model.train_on_batch(s_batch, target_f)
+
+        if loss > 0:
+            print(loss)
+
 
     def save_network(self, path):
         # Saves model at specified path as h5 file
