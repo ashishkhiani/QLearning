@@ -3,7 +3,6 @@ import random
 import numpy as np
 from keras import Sequential
 from keras.layers import Dense
-from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
 from ReplayBuffer import ReplayBuffer
@@ -38,8 +37,8 @@ class DQNAgent:
             # choose action via exploration
             return self.action_space.sample()
 
-        # TODO choose action via exploitation
-        return np.argmax(self.model.predict(state.reshape(1, 128)))
+        new_shape = (1,) + self.observation_space.shape
+        return np.argmax(self.model.predict(state.reshape(new_shape)))
 
     def replay(self):
 
@@ -58,29 +57,16 @@ class DQNAgent:
             self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay_rate)
 
     def learn(self, batch):
-        states, actions, rewards, next_states, _ = list(map(np.array, list(zip(*batch))))
+        states, actions, rewards, next_states, dones = list(map(np.array, list(zip(*batch))))
 
         current_q_values = self.model.predict(states)
         next_q_values = self.model.predict(next_states)
-        target_q_values = rewards.reshape(len(batch), 1) + (next_q_values * self.discount_factor)
+
+        is_not_done = np.logical_not(dones.reshape(len(batch), 1))  # Flip all Ts to Fs and Fs to Ts.
+        target_q_values = rewards.reshape(len(batch), 1) + (next_q_values * self.discount_factor * is_not_done)
+
         loss = self.model.train_on_batch(states, target_q_values)
         print(loss)
-
-        # states, actions, rewards, next_states, dones = list(map(np.array, list(zip(*batch))))
-        #
-        # targets = np.zeros((len(batch), self.action_space.n))
-        #
-        # for i in range(len(batch)):
-        #     targets[i] = self.model.predict(states[i].reshape(1, 128), batch_size=1)
-        #     fut_action = self.model.predict(next_states[i].reshape(1, 128), batch_size=1)
-        #     targets[i, actions[i]] = rewards[i]
-        #
-        #     if not dones[i]:
-        #         targets[i, actions[i]] += self.discount_factor * np.max(fut_action)
-        #
-        # loss = self.model.train_on_batch(states, targets)
-        # print(loss)
-
 
     def save_network(self, path):
         # Saves model at specified path as h5 file
