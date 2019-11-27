@@ -1,4 +1,4 @@
-import statistics
+import pickle
 
 import matplotlib.pyplot as plt
 
@@ -19,11 +19,21 @@ class QLearningDataHandler:
     @staticmethod
     def plot_reward_curve(reward_values):
         x = [i for i in range(len(reward_values))]
-        y = [statistics.mean(i) for i in reward_values]
+        y = [i for i in reward_values]
 
         plt.xlabel('Epoch')
-        plt.xticks(x)
-        plt.ylabel('Mean Reward')
+        plt.ylabel('Total Reward')
+
+        plt.plot(x, y)
+        plt.show()
+
+    @staticmethod
+    def plot_time_taken_curve(time_values):
+        x = [i for i in range(len(time_values))]
+        y = [i for i in time_values]
+
+        plt.xlabel('Epoch')
+        plt.ylabel('Time taken (units)')
 
         plt.plot(x, y)
         plt.show()
@@ -38,3 +48,23 @@ class QLearningDataHandler:
 
         plt.plot(x, y)
         plt.show()
+
+    def load_data_from_file(self):
+        with open('output/loss_values.txt', 'rb') as file:
+            loss_values = pickle.load(file)
+            self.plot_loss_curve(loss_values)
+
+        with open('output/reward_values.txt', 'rb') as file:
+            reward_values = pickle.load(file)
+            self.plot_reward_curve(reward_values)
+
+        with open('output/epsilon_values.txt', 'rb') as file:
+            epsilon_values = pickle.load(file)
+            self.plot_epsilon_curve(epsilon_values)
+
+        with open('output/time_values.txt', 'rb') as file:
+            time_values = pickle.load(file)
+            self.plot_time_taken_curve(time_values)
+
+# handler = QLearningDataHandler()
+# handler.load_data_from_file()

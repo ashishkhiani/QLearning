@@ -6,7 +6,7 @@ from QLearningDataHandler import QLearningDataHandler
 from parameters import EMULATION, NUM_EPOCHS
 
 
-def plot(loss_values, reward_values, epsilon_values):
+def plot(loss_values, reward_values, epsilon_values, time_values):
     with open('output/loss_values.txt', 'wb') as file:
         pickle.dump(loss_values, file)
 
@@ -16,10 +16,14 @@ def plot(loss_values, reward_values, epsilon_values):
     with open('output/epsilon_values.txt', 'wb') as file:
         pickle.dump(epsilon_values, file)
 
+    with open('output/time_values.txt', 'wb') as file:
+        pickle.dump(time_values, file)
+
     handler = QLearningDataHandler()
     handler.plot_loss_curve(loss_values)
     handler.plot_reward_curve(reward_values)
     handler.plot_epsilon_curve(epsilon_values)
+    handler.plot_time_taken_curve(time_values)
 
 
 def train_model_using_dqn(show_emulation=False):
@@ -29,18 +33,18 @@ def train_model_using_dqn(show_emulation=False):
     loss_values = []
     reward_values = []
     epsilon_values = [agent.epsilon]
+    time_values = []
 
-    steps = 0
     for i in range(NUM_EPOCHS):
         total_reward = 0
         print(f'Epoch {i}')
         current_state = env.reset()
         done = False
-        j = 0
-
-        epoch_rewards = []
+        time_stamps = 0
 
         while not done:
+            time_stamps += 1
+
             if show_emulation:
                 env.render()
 
@@ -51,7 +55,7 @@ def train_model_using_dqn(show_emulation=False):
             next_state, reward, done, info = env.step(action)
 
             if done:
-                print(f'Epoch {i} ended at the {j} timestamp')
+                print(f'Epoch {i} ran for {time_stamps} timestamps')
 
             # Store experience in replay buffer
             experience = (current_state, action, reward, next_state, done)
@@ -66,20 +70,18 @@ def train_model_using_dqn(show_emulation=False):
                 loss_values.append(agent.learn(batch))
 
             total_reward += reward
-            epoch_rewards.append(reward)
-
-            j += 1
-            steps += 1
 
         # decay epsilon at the end of every epoch
         agent.decay_epsilon()
         print(f'TOTAL REWARD: {total_reward}')
-        reward_values.append(epoch_rewards)
+
+        reward_values.append(total_reward)
         epsilon_values.append(agent.epsilon)
+        time_values.append(time_stamps)
 
     env.close()
 
-    plot(loss_values, reward_values, epsilon_values)
+    plot(loss_values, reward_values, epsilon_values, time_values)
 
 
 if __name__ == "__main__":

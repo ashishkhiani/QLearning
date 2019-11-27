@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 from keras import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
 
 from ReplayBuffer import ReplayBuffer
@@ -27,7 +27,14 @@ class DQNAgent:
     def _build_model(self):
         model = Sequential()
         model.add(Dense(128, input_shape=self.observation_space.shape))
+
         model.add(Dense(128, activation='relu'))
+        model.add(Dropout(0.35))
+        model.add(Dense(128, activation='relu'))
+        model.add(Dropout(0.35))
+        model.add(Dense(128, activation='relu'))
+        model.add(Dropout(0.35))
+
         model.add(Dense(self.action_space.n, activation='linear'))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
         return model
@@ -60,7 +67,6 @@ class DQNAgent:
     def learn(self, batch):
         states, actions, rewards, next_states, dones = list(map(np.array, list(zip(*batch))))
 
-        current_q_values = self.model.predict(states)
         next_q_values = self.model.predict(next_states)
 
         is_not_done = np.logical_not(dones.reshape(len(batch), 1))  # Flip all Ts to Fs and Fs to Ts.
