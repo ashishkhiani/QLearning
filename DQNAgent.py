@@ -2,7 +2,8 @@ import random
 
 import numpy as np
 from keras import Sequential
-from keras.layers import Dense, Flatten
+from keras.layers import Dense
+from keras.losses import mean_squared_error
 from keras.optimizers import Adam
 
 from ReplayBuffer import ReplayBuffer
@@ -32,13 +33,13 @@ class DQNAgent:
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
         return model
 
-    def get_action(self):
+    def get_action(self, state):
         if random.random() <= self.epsilon:
             # choose action via exploration
             return self.action_space.sample()
 
         # TODO choose action via exploitation
-        return self.action_space.sample()
+        return np.argmax(self.model.predict(state.reshape(1, 128)))
 
     def replay(self):
 
@@ -57,19 +58,29 @@ class DQNAgent:
             self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay_rate)
 
     def learn(self, batch):
-        if len(batch) == 0:
-            return
+        states, actions, rewards, next_states, _ = list(map(np.array, list(zip(*batch))))
 
-        s_batch, a_batch, r_batch, s2_batch, d_batch = list(map(np.array, list(zip(*batch))))
+        current_q_values = self.model.predict(states)
+        next_q_values = self.model.predict(next_states)
+        target_q_values = rewards.reshape(len(batch), 1) + (next_q_values * self.discount_factor)
+        loss = self.model.train_on_batch(states, target_q_values)
+        print(loss)
 
-        target = r_batch
+        # states, actions, rewards, next_states, dones = list(map(np.array, list(zip(*batch))))
+        #
+        # targets = np.zeros((len(batch), self.action_space.n))
+        #
+        # for i in range(len(batch)):
+        #     targets[i] = self.model.predict(states[i].reshape(1, 128), batch_size=1)
+        #     fut_action = self.model.predict(next_states[i].reshape(1, 128), batch_size=1)
+        #     targets[i, actions[i]] = rewards[i]
+        #
+        #     if not dones[i]:
+        #         targets[i, actions[i]] += self.discount_factor * np.max(fut_action)
+        #
+        # loss = self.model.train_on_batch(states, targets)
+        # print(loss)
 
-        if not d_batch.all():
-            target = r_batch + self.discount_factor * np.amax(self.model.predict(s2_batch))
-
-        target_f = self.model.predict(s_batch)
-
-        self.model.fit(s_batch, target_f, epochs=1, verbose=0)
 
     def save_network(self, path):
         # Saves model at specified path as h5 file

@@ -18,7 +18,7 @@ def train_model_using_dqn(show_emulation=False):
                 env.render()
 
             # Select an action via explore or exploit
-            action = agent.get_action()
+            action = agent.get_action(current_state)
 
             # Execute selected action
             next_state, reward, done, info = env.step(action)
@@ -34,7 +34,8 @@ def train_model_using_dqn(show_emulation=False):
             batch = agent.replay()
 
             # Train network with random sample
-            agent.learn(batch)
+            if len(batch) > 0:
+                agent.learn(batch)
 
             # TODO Calculate loss between output Q-values and target Q-values
 
@@ -44,7 +45,7 @@ def train_model_using_dqn(show_emulation=False):
 
         # decay epsilon at the end of every episode
         agent.decay_epsilon()
-        print(total_reward)
+        print(f'TOTAL REWARD: {total_reward}')
 
     env.close()
 
