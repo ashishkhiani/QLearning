@@ -35,6 +35,8 @@ def train_model_using_dqn(show_emulation=False):
     epsilon_values = [agent.epsilon]
     time_values = []
 
+    max_reward = 0
+
     for i in range(NUM_EPOCHS):
         total_reward = 0
         print(f'Epoch {i}')
@@ -78,6 +80,13 @@ def train_model_using_dqn(show_emulation=False):
         reward_values.append(total_reward)
         epsilon_values.append(agent.epsilon)
         time_values.append(time_stamps)
+
+        # save best model
+        if total_reward > max_reward:
+            max_reward = total_reward
+            agent.save_network('static\\best_model.h5')
+
+        agent.save_network('static\\most_recent_model.h5')
 
     env.close()
 
