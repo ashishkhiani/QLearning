@@ -1,19 +1,20 @@
 import gym
-import numpy as np
 
 from DQNAgent import DQNAgent
-from parameters import EMULATION, NUM_EPISODES, NUM_TIME_STEPS
+from parameters import EMULATION, NUM_EPOCHS
 
 
 def train_model_using_dqn(show_emulation=False):
     env = gym.make(EMULATION)
     agent = DQNAgent(env.observation_space, env.action_space)
 
-    for i in range(NUM_EPISODES):
+    for i in range(NUM_EPOCHS):
         total_reward = 0
-        print(f'Episode {i}')
+        print(f'Epoch {i}')
         current_state = env.reset()
-        for _ in range(NUM_TIME_STEPS):
+        done = False
+        j = 0
+        while not done:
             if show_emulation:
                 env.render()
 
@@ -23,7 +24,8 @@ def train_model_using_dqn(show_emulation=False):
             # Execute selected action
             next_state, reward, done, info = env.step(action)
 
-            # TODO handle done case
+            if done:
+                print(f'Epoch {i} ended at the {j} timestamp')
 
             # Store experience in replay buffer
             experience = (current_state, action, reward, next_state, done)
@@ -37,13 +39,10 @@ def train_model_using_dqn(show_emulation=False):
             if len(batch) > 0:
                 agent.learn(batch)
 
-            # TODO Calculate loss between output Q-values and target Q-values
-
-            # TODO do something with gradient descent and loss
-
             total_reward += reward
+            j += 1
 
-        # decay epsilon at the end of every episode
+        # decay epsilon at the end of every epoch
         agent.decay_epsilon()
         print(f'TOTAL REWARD: {total_reward}')
 

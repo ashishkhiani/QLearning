@@ -26,8 +26,8 @@ class DQNAgent:
 
     def _build_model(self):
         model = Sequential()
-        model.add(Dense(24, input_shape=self.observation_space.shape))
-        model.add(Dense(24, activation='relu'))
+        model.add(Dense(128, input_shape=self.observation_space.shape))
+        model.add(Dense(128, activation='relu'))
         model.add(Dense(self.action_space.n, activation='linear'))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
         return model
@@ -37,6 +37,7 @@ class DQNAgent:
             # choose action via exploration
             return self.action_space.sample()
 
+        #  choose action via exploitation
         new_shape = (1,) + self.observation_space.shape
         return np.argmax(self.model.predict(state.reshape(new_shape)))
 
@@ -66,7 +67,7 @@ class DQNAgent:
         target_q_values = rewards.reshape(len(batch), 1) + (next_q_values * self.discount_factor * is_not_done)
 
         loss = self.model.train_on_batch(states, target_q_values)
-        print(loss)
+        # print(loss)
 
     def save_network(self, path):
         # Saves model at specified path as h5 file
