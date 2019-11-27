@@ -49,7 +49,7 @@ class DQNAgent:
             return self.action_space.sample()
 
         #  choose action via exploitation
-        self.predict_action(state)
+        return self.predict_action(state)
 
     def replay(self):
 
