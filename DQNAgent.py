@@ -2,6 +2,7 @@ import random
 
 import numpy as np
 from keras import Sequential
+from keras.engine.saving import load_model
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
 
@@ -84,5 +85,5 @@ class DQNAgent:
         print("Successfully saved network.")
 
     def load_network(self, path):
-        self.model.load_weights(path)
+        self.model = load_model(path)
         print("Succesfully loaded network.")

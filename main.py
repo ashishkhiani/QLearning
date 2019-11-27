@@ -76,7 +76,8 @@ def train_model_using_dqn(show_emulation=False):
 
             # Train network with random sample
             if len(batch) > 0:
-                loss_values.append(agent.learn(batch))
+                loss = agent.learn(batch)
+                loss_values.append(loss)
 
             total_reward += reward
 
