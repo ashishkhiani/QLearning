@@ -39,14 +39,17 @@ class DQNAgent:
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
         return model
 
+    def predict_action(self, state):
+        new_shape = (1,) + self.observation_space.shape
+        return np.argmax(self.model.predict(state.reshape(new_shape)))
+
     def get_action(self, state):
         if random.random() <= self.epsilon:
             # choose action via exploration
             return self.action_space.sample()
 
         #  choose action via exploitation
-        new_shape = (1,) + self.observation_space.shape
-        return np.argmax(self.model.predict(state.reshape(new_shape)))
+        self.predict_action(state)
 
     def replay(self):
 

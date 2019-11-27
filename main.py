@@ -3,7 +3,7 @@ import pickle
 
 from DQNAgent import DQNAgent
 from QLearningDataHandler import QLearningDataHandler
-from parameters import EMULATION, NUM_EPOCHS
+from parameters import EMULATION, NUM_EPOCHS, FRAME_SKIP
 
 
 def plot(loss_values, reward_values, epsilon_values, time_values):
@@ -56,6 +56,10 @@ def train_model_using_dqn(show_emulation=False):
             # Execute selected action
             next_state, reward, done, info = env.step(action)
 
+            if FRAME_SKIP > 0:
+                for i in range(FRAME_SKIP - 1):
+                    next_state, reward, done, info = env.step(action)
+
             if done:
                 print(f'Epoch {i} ran for {time_stamps} timestamps')
 
@@ -91,6 +95,27 @@ def train_model_using_dqn(show_emulation=False):
     env.close()
 
     plot(loss_values, reward_values, epsilon_values, time_values)
+
+
+def play_game(model_name, num_episodes, use_random=False):
+    env = gym.make(EMULATION)
+    agent = DQNAgent(env.observation_space, env.action_space)
+    agent.load_network('static\\' + model_name)
+
+    for i_episode in range(num_episodes):
+        state = env.reset()
+        done = False
+        while not done:
+            env.render()
+            if use_random:
+                action = env.action_space.sample()
+            else:
+                action = agent.predict_action(state)
+
+            state, reward, done, info = env.step(action)
+            if done:
+                break
+    env.close()
 
 
 if __name__ == "__main__":
