@@ -1,3 +1,5 @@
+import time
+
 import gym
 import pickle
 
@@ -7,16 +9,17 @@ from parameters import EMULATION, NUM_EPOCHS, FRAME_SKIP
 
 
 def plot(loss_values, reward_values, epsilon_values, time_values):
-    with open('output/loss_values.txt', 'wb') as file:
+    current_time = time.time()
+    with open(f'output/loss_values_{current_time}.txt', 'wb') as file:
         pickle.dump(loss_values, file)
 
-    with open('output/reward_values.txt', 'wb') as file:
+    with open(f'output/reward_values_{current_time}.txt', 'wb') as file:
         pickle.dump(reward_values, file)
 
-    with open('output/epsilon_values.txt', 'wb') as file:
+    with open(f'output/epsilon_values_{current_time}.txt', 'wb') as file:
         pickle.dump(epsilon_values, file)
 
-    with open('output/time_values.txt', 'wb') as file:
+    with open(f'output/time_values_{current_time}.txt', 'wb') as file:
         pickle.dump(time_values, file)
 
     handler = QLearningDataHandler()
@@ -86,15 +89,15 @@ def train_model_using_dqn(show_emulation=False):
         time_values.append(time_stamps)
 
         # save best model
-        if total_reward > max_reward:
+        if total_reward >= max_reward:
             max_reward = total_reward
-            agent.save_network('static\\best_model.h5')
-
-        agent.save_network('static\\most_recent_model.h5')
+            agent.save_network('static/best_model.h5')
 
     env.close()
 
     plot(loss_values, reward_values, epsilon_values, time_values)
+
+    agent.save_network('static/most_recent_model.h5')
 
 
 def play_game(model_name, num_episodes, use_random=False):
