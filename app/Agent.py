@@ -70,10 +70,11 @@ class Agent:
         self.replay_buffer.add(experience)
 
     def populate_buffer(self, env):
+        print('Populating buffer')
         current_state = env.reset()
         for i in range(REPLAY_BUFFER_CAPACITY):
             action = env.action_space.sample()
-            next_state, reward, done, _ = env.step()
+            next_state, reward, done, _ = env.step(action)
             experience = (current_state, action, reward, next_state, done)
             self.remember(experience)
             current_state = next_state

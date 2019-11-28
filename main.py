@@ -4,6 +4,7 @@ import gym
 import pickle
 
 from app.DQNAgent import DQNAgent
+from app.DoubleDQNAgent import DoubleDQNAgent
 from parameters import EMULATION, NUM_EPOCHS, FRAME_SKIP
 
 
@@ -122,7 +123,8 @@ def play_game(model_name, num_episodes, use_random=False):
 
 if __name__ == "__main__":
     train_model(
-        rl_agent=DQNAgent,
+        rl_agent=DoubleDQNAgent,
+        persist_data=True,
+        initialize_buffer=True,
         show_emulation=False,
-        persist_data=False
     )
