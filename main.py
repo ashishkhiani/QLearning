@@ -3,30 +3,24 @@ import time
 import gym
 import pickle
 
-from DQNAgent import DQNAgent
-from QLearningDataHandler import QLearningDataHandler
+from app.DQNAgent import DQNAgent
 from parameters import EMULATION, NUM_EPOCHS, FRAME_SKIP
 
 
-def plot(loss_values, reward_values, epsilon_values, time_values):
+def save_results(loss_values, reward_values, epsilon_values, time_values):
+    print('Saving results')
     current_time = time.time()
-    with open(f'output/loss_values_{current_time}.txt', 'wb') as file:
+    with open(f'output/loss_values_{EMULATION}_{current_time}.txt', 'wb') as file:
         pickle.dump(loss_values, file)
 
-    with open(f'output/reward_values_{current_time}.txt', 'wb') as file:
+    with open(f'output/reward_values_{EMULATION}_{current_time}.txt', 'wb') as file:
         pickle.dump(reward_values, file)
 
-    with open(f'output/epsilon_values_{current_time}.txt', 'wb') as file:
+    with open(f'output/epsilon_values_{EMULATION}_{current_time}.txt', 'wb') as file:
         pickle.dump(epsilon_values, file)
 
-    with open(f'output/time_values_{current_time}.txt', 'wb') as file:
+    with open(f'output/time_values_{EMULATION}_{current_time}.txt', 'wb') as file:
         pickle.dump(time_values, file)
-
-    handler = QLearningDataHandler()
-    handler.plot_loss_curve(loss_values)
-    handler.plot_reward_curve(reward_values)
-    handler.plot_epsilon_curve(epsilon_values)
-    handler.plot_time_taken_curve(time_values)
 
 
 def train_model_using_dqn(show_emulation=False):
@@ -96,7 +90,7 @@ def train_model_using_dqn(show_emulation=False):
 
     env.close()
 
-    plot(loss_values, reward_values, epsilon_values, time_values)
+    save_results(loss_values, reward_values, epsilon_values, time_values)
 
     agent.save_network('static/most_recent_model.h5')
 
