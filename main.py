@@ -23,9 +23,9 @@ def save_results(loss_values, reward_values, epsilon_values, time_values):
         pickle.dump(time_values, file)
 
 
-def train_model_using_dqn(show_emulation=False):
+def train_model(rl_agent, show_emulation=False, persist_data=False):
     env = gym.make(EMULATION)
-    agent = DQNAgent(env.observation_space, env.action_space)
+    agent = rl_agent(env.observation_space, env.action_space)
 
     loss_values = []
     reward_values = []
@@ -86,13 +86,14 @@ def train_model_using_dqn(show_emulation=False):
         # save best model
         if total_reward >= max_reward:
             max_reward = total_reward
-            agent.save_network('static/best_model.h5')
+            agent.save_network('output/models/best_model.h5')
 
     env.close()
 
-    save_results(loss_values, reward_values, epsilon_values, time_values)
+    if persist_data:
+        save_results(loss_values, reward_values, epsilon_values, time_values)
 
-    agent.save_network('static/most_recent_model.h5')
+    agent.save_network('output/models/most_recent_model.h5')
 
 
 def play_game(model_name, num_episodes, use_random=False):
@@ -117,4 +118,8 @@ def play_game(model_name, num_episodes, use_random=False):
 
 
 if __name__ == "__main__":
-    train_model_using_dqn(show_emulation=False)
+    train_model(
+        rl_agent=DQNAgent,
+        show_emulation=False,
+        persist_data=False
+    )
