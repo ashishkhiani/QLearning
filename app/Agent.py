@@ -69,6 +69,18 @@ class Agent:
     def remember(self, experience):
         self.replay_buffer.add(experience)
 
+    def populate_buffer(self, env):
+        current_state = env.reset()
+        for i in range(REPLAY_BUFFER_CAPACITY):
+            action = env.action_space.sample()
+            next_state, reward, done, _ = env.step()
+            experience = (current_state, action, reward, next_state, done)
+            self.remember(experience)
+            current_state = next_state
+
+            if done:
+                current_state = env.reset()
+
     @abstractmethod
     def learn(self, batch):
         pass

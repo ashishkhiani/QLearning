@@ -23,9 +23,12 @@ def save_results(loss_values, reward_values, epsilon_values, time_values):
         pickle.dump(time_values, file)
 
 
-def train_model(rl_agent, show_emulation=False, persist_data=False):
+def train_model(rl_agent, show_emulation=False, persist_data=False, initialize_buffer=True):
     env = gym.make(EMULATION)
     agent = rl_agent(env.observation_space, env.action_space)
+
+    if initialize_buffer:
+        agent.populate_buffer(env)
 
     loss_values = []
     reward_values = []
