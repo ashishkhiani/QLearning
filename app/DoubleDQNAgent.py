@@ -1,4 +1,6 @@
 import numpy as np
+from keras.engine.saving import load_model
+
 from app.Agent import Agent
 from parameters import TARGET_MODEL_UPDATE_ITERATIONS
 
@@ -38,5 +40,6 @@ class DoubleDQNAgent(Agent):
             model_weights = self.model.get_weights()
             self.target_model.set_weights(model_weights)
 
-
-
+    def load_target_network(self, path):
+        self.target_model = load_model(path)
+        print("Succesfully target loaded network.")
