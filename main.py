@@ -24,7 +24,7 @@ def save_results(loss_values, reward_values, epsilon_values, time_values):
         pickle.dump(time_values, file)
 
 
-def train_model(rl_agent, show_emulation=False, persist_data=False, initialize_buffer=True):
+def train_model(rl_agent, show_emulation=False, persist_data=False, initialize_buffer=True, normalize=True):
     env = gym.make(EMULATION)
     agent = rl_agent(env.observation_space, env.action_space)
 
@@ -51,11 +51,19 @@ def train_model(rl_agent, show_emulation=False, persist_data=False, initialize_b
             if show_emulation:
                 env.render()
 
+            if normalize:
+                current_state = current_state.astype(float)
+                normalize_state(current_state)
+
             # Select an action via explore or exploit
             action = agent.get_action(current_state)
 
             # Execute selected action
             next_state, reward, done, info = env.step(action)
+
+            if normalize:
+                next_state = next_state.astype(float)
+                normalize_state(next_state)
 
             if FRAME_SKIP > 0:
                 for _ in range(FRAME_SKIP - 1):
@@ -121,10 +129,16 @@ def play_game(model_name, num_episodes, use_random=False):
     env.close()
 
 
+def normalize_state(state):
+    for j in range(len(state)):
+        state[j] = state[j] / 256
+
+
 if __name__ == "__main__":
     train_model(
         rl_agent=DoubleDQNAgent,
         persist_data=True,
-        initialize_buffer=True,
+        initialize_buffer=False,
         show_emulation=False,
+        normalize=True
     )
