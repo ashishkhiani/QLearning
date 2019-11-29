@@ -41,7 +41,7 @@ class Agent:
         model.add(Dense(128, activation='relu'))
         model.add(Dropout(0.35))
 
-        model.add(Dense(self.action_space.n, activation='linear'))
+        model.add(Dense(self.action_space.n, activation=None))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
         return model
 
