@@ -1,6 +1,15 @@
 import pickle
 
 import matplotlib.pyplot as plt
+from scipy.signal import lfilter
+
+from parameters import EMULATION
+
+dark_blue = "#99abee"
+light_blue = "#3355dd"
+
+light_red = "#eea28d"
+dark_red = "#dd4411"
 
 
 class QLearningDataHandler:
@@ -8,7 +17,7 @@ class QLearningDataHandler:
     @staticmethod
     def plot_loss_curve(loss_values):
         x = [i for i in range(len(loss_values))]
-        y = [loss for loss in loss_values]
+        y = [i for i in loss_values]
 
         plt.xlabel('Steps')
         plt.ylabel('Loss')
@@ -24,7 +33,14 @@ class QLearningDataHandler:
         plt.xlabel('Epoch')
         plt.ylabel('Total Reward')
 
-        plt.plot(x, y)
+        plt.plot(x, y, c=dark_blue)
+
+        n = 15
+        b = [1.0 / n] * n
+        a = 1
+        yy = lfilter(b, a, y)
+        plt.plot(x, yy, linewidth=2, linestyle="-", c=light_blue)
+
         plt.show()
 
     @staticmethod
@@ -35,7 +51,14 @@ class QLearningDataHandler:
         plt.xlabel('Epoch')
         plt.ylabel('Time taken (units)')
 
-        plt.plot(x, y)
+        plt.plot(x, y, c=dark_blue)
+
+        n = 15
+        b = [1.0 / n] * n
+        a = 1
+        yy = lfilter(b, a, y)
+        plt.plot(x, yy, linewidth=2, linestyle="-", c=light_blue)
+
         plt.show()
 
     @staticmethod
@@ -49,19 +72,30 @@ class QLearningDataHandler:
         plt.plot(x, y)
         plt.show()
 
-    def load_data_from_file(self):
-        with open('output/loss_values.txt', 'rb') as file:
+    def load_data_from_file(self, directory, _class):
+        misc = f'{EMULATION}_{_class}'
+
+        with open(f'{directory}/loss_values_{misc}.txt', 'rb') as file:
             loss_values = pickle.load(file)
-            self.plot_loss_curve(loss_values)
+            if loss_values:
+                self.plot_loss_curve(loss_values)
 
-        with open('output/reward_values.txt', 'rb') as file:
+        with open(f'{directory}/reward_values_{misc}.txt', 'rb') as file:
             reward_values = pickle.load(file)
-            self.plot_reward_curve(reward_values)
+            if reward_values:
+                self.plot_reward_curve(reward_values)
 
-        with open('output/epsilon_values.txt', 'rb') as file:
+        with open(f'{directory}/epsilon_values_{misc}.txt', 'rb') as file:
             epsilon_values = pickle.load(file)
-            self.plot_epsilon_curve(epsilon_values)
+            if epsilon_values:
+                self.plot_epsilon_curve(epsilon_values)
 
-        with open('output/time_values.txt', 'rb') as file:
+        with open(f'{directory}/time_values_{misc}.txt', 'rb') as file:
             time_values = pickle.load(file)
-            self.plot_time_taken_curve(time_values)
+            if time_values:
+                self.plot_time_taken_curve(time_values)
+
+
+handler = QLearningDataHandler()
+handler.load_data_from_file('output/2019_12_05_12:15:00', 'Random')
+
