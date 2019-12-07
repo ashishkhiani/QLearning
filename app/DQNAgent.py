@@ -1,5 +1,6 @@
 import numpy as np
 from app.Agent import Agent
+from parameters import DISCOUNT_FACTOR
 
 
 class DQNAgent(Agent):
@@ -16,7 +17,7 @@ class DQNAgent(Agent):
         next_q_values = self.model.predict(next_states)
 
         is_not_done = np.logical_not(dones.reshape(len(batch), 1))  # Flip all Ts to Fs and Fs to Ts.
-        target_q_values = rewards.reshape(len(batch), 1) + (next_q_values * self.discount_factor * is_not_done)
+        target_q_values = rewards.reshape(len(batch), 1) + (next_q_values * DISCOUNT_FACTOR * is_not_done)
 
         loss = self.model.train_on_batch(states, target_q_values)
         return loss

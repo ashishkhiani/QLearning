@@ -1,8 +1,7 @@
 import numpy as np
-from keras.engine.saving import load_model
 
 from app.Agent import Agent
-from parameters import TARGET_MODEL_UPDATE_ITERATIONS
+from parameters import TARGET_MODEL_UPDATE_ITERATIONS, DISCOUNT_FACTOR
 
 
 class DoubleDQNAgent(Agent):
@@ -19,7 +18,9 @@ class DoubleDQNAgent(Agent):
         self.iterations += 1
 
         if self.iterations == TARGET_MODEL_UPDATE_ITERATIONS:
-            self.clone_model()
+            print('updating target model')
+            model_weights = self.model.get_weights()
+            self.target_model.set_weights(model_weights)
             self.iterations = 0
 
         states, actions, rewards, next_states, dones = list(map(np.array, list(zip(*batch))))
@@ -27,19 +28,7 @@ class DoubleDQNAgent(Agent):
         next_q_values = self.target_model.predict(next_states)
 
         is_not_done = np.logical_not(dones.reshape(len(batch), 1))  # Flip all Ts to Fs and Fs to Ts.
-        target_q_values = rewards.reshape(len(batch), 1) + (next_q_values * self.discount_factor * is_not_done)
+        target_q_values = rewards.reshape(len(batch), 1) + (next_q_values * DISCOUNT_FACTOR * is_not_done)
 
         loss = self.model.train_on_batch(states, target_q_values)
         return loss
-
-    def clone_model(self, persist=False):
-        if persist:
-            self.save_network('output\\models\\clone.h5')
-            self.target_model = self.load_network('output\\models\\clone.h5')
-        else:
-            model_weights = self.model.get_weights()
-            self.target_model.set_weights(model_weights)
-
-    def load_target_network(self, path):
-        self.target_model = load_model(path)
-        print("Succesfully target loaded network.")

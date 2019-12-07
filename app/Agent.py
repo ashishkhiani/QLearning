@@ -13,7 +13,6 @@ from parameters import \
     REPLAY_BUFFER_CAPACITY, \
     EPSILON_DECAY_RATE, \
     EPSILON_MIN, \
-    DISCOUNT_FACTOR, \
     LEARNING_RATE, \
     REPLAY_BUFFER_SAMPLING_SIZE
 
@@ -25,9 +24,6 @@ class Agent:
         self.action_space = action_space
         self.replay_buffer = ReplayBuffer(capacity=REPLAY_BUFFER_CAPACITY)
         self.epsilon = 1
-        self.epsilon_decay_rate = EPSILON_DECAY_RATE
-        self.epsilon_min = EPSILON_MIN
-        self.discount_factor = DISCOUNT_FACTOR
         self.model = self.build_model()
 
     def build_model(self):
@@ -77,7 +73,7 @@ class Agent:
             next_state, reward, done, _ = env.step(action)
             experience = (current_state, action, reward, next_state, done)
             self.remember(experience)
-            current_state = next_state
+            current_state = next_state.copy()
 
             if done:
                 current_state = env.reset()
@@ -87,8 +83,8 @@ class Agent:
         pass
 
     def decay_epsilon(self):
-        if self.epsilon > self.epsilon_min:
-            self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay_rate)
+        if self.epsilon > EPSILON_MIN:
+            self.epsilon = max(EPSILON_MIN, self.epsilon * EPSILON_DECAY_RATE)
 
     def save_network(self, path):
         self.model.save(path)
