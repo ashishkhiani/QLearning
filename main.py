@@ -10,6 +10,11 @@ from parameters import EMULATION, NUM_EPOCHS, FRAME_SKIP
 
 
 def save_results(data, agent):
+    """
+    Saves the results to file
+    :param data: Data to persist
+    :param agent: Agent Class for file naming
+    """
     print('Saving results')
     loss_values, reward_values, epsilon_values, time_values = data
     current_time = time.strftime('%Y_%m_%d_%H:%M:%S')
@@ -40,6 +45,9 @@ def save_results(data, agent):
 
 
 def baseline():
+    """
+    Baseline method that lets the agent perform only random actions
+    """
     env = gym.make(EMULATION)
     reward_values = []
     time_values = []
@@ -72,10 +80,18 @@ def baseline():
 
 
 def train_model(rl_agent, show_emulation=False, persist_data=False, initialize_buffer=True, normalize=True):
+    """
+    Trains the model using a certain Q-Learning Algorithm
+    """
+
+    # make gym environment
     env = gym.make(EMULATION)
+
+    # initialize agent
     agent = rl_agent(env.observation_space, env.action_space)
 
     if initialize_buffer:
+        # we populate buffer with random actions until maximum capacity
         agent.populate_buffer(env)
 
     loss_values = []
@@ -86,17 +102,17 @@ def train_model(rl_agent, show_emulation=False, persist_data=False, initialize_b
     for i in range(NUM_EPOCHS):
         total_reward = 0
         print(f'Epoch {i}')
-        current_state = env.reset()
+        current_state = env.reset()  # initialize current state
         done = False
         time_steps = 0
 
-        while not done:
+        while not done:  # epoch is over when agent loses all of its lives
             time_steps += 1
 
             if show_emulation:
                 env.render()
 
-            if normalize:
+            if normalize:  # normalize RAM state if required
                 current_state = current_state.astype(float)
                 normalize_state(current_state)
 
@@ -111,7 +127,7 @@ def train_model(rl_agent, show_emulation=False, persist_data=False, initialize_b
                 normalize_state(next_state)
 
             if FRAME_SKIP > 0:
-                for _ in range(FRAME_SKIP - 1):
+                for _ in range(FRAME_SKIP - 1):  # repeat action for k frames
                     next_state, reward, done, info = env.step(action)
 
             if done:
@@ -121,8 +137,10 @@ def train_model(rl_agent, show_emulation=False, persist_data=False, initialize_b
             experience = (current_state, action, reward, next_state, done)
             agent.remember(experience)
 
+            # Update the current state
             current_state = next_state.copy()
 
+            # Randomly sample from replay buffer
             batch = agent.replay()
 
             # Train network with random sample
@@ -143,11 +161,15 @@ def train_model(rl_agent, show_emulation=False, persist_data=False, initialize_b
     env.close()
 
     if persist_data:
+        # save results
         data = (loss_values, reward_values, epsilon_values, time_values)
         save_results(data, agent)
 
 
 def play_game(path, num_episodes, use_random=False):
+    """
+    Updates the neural network with the saved model on file and runs the emulation
+    """
     env = gym.make(EMULATION)
     agent = DQNAgent(env.observation_space, env.action_space)
     agent.load_network(path)
@@ -169,22 +191,31 @@ def play_game(path, num_episodes, use_random=False):
 
 
 def normalize_state(state):
+    """
+    Reduce the values of the RAM state to be in the range 0 <= j <= 1
+    """
     for j in range(len(state)):
         state[j] = state[j] / 256
 
 
-if __name__ == "__main__":
-    # train_model(
-    #     rl_agent=DoubleDQNAgent,
-    #     persist_data=True,
-    #     initialize_buffer=False,
-    #     show_emulation=True,
-    #     normalize=False
-    # )
+def main():
+    """
+    Main code to run program
+    """
+    train_model(
+        rl_agent=DoubleDQNAgent,
+        persist_data=True,
+        initialize_buffer=True,
+        show_emulation=False,
+        normalize=False
+    )
 
-    # play_game(
-    #     path='output/2019_12_05_08:25:54/most_recent_model_SpaceInvaders-ram-v0_DoubleDQNAgent.h5',
-    #     num_episodes=10
-    # )
-
+    train_model(
+        rl_agent=DQNAgent,
+        persist_data=True,
+        initialize_buffer=True,
+        show_emulation=False,
+        normalize=False
+    )
+    
     baseline()
