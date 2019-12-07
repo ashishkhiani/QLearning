@@ -38,4 +38,5 @@ class DoubleDQNAgent(Agent):
         target_q_values = rewards.reshape(len(batch), 1) + (next_q_values * DISCOUNT_FACTOR * is_not_done)
 
         loss = self.model.train_on_batch(states, target_q_values)
+
         return loss

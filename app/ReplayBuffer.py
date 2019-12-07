@@ -12,6 +12,9 @@ class ReplayBuffer:
         self.replay_buffer = deque(maxlen=capacity)
 
     def can_sample(self, n):
+        """
+        Returns true if replay buffer contains enough experiences to sample
+        """
         return len(self.replay_buffer) >= n
 
     def sample(self, n):
@@ -24,6 +27,6 @@ class ReplayBuffer:
     def add(self, experience):
         """
         Adds an experience to the replay buffer
-        :param experience: A tuple of the form (s_t, a_t, reward_next, s_next)
+        :param experience: A tuple of the form (s_t, a_t, reward_next, s_next, done)
         """
         self.replay_buffer.append(experience)
