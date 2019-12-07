@@ -12,8 +12,12 @@ class DQNAgent(Agent):
         super().__init__(observation_space, action_space)
 
     def learn(self, batch):
+        """
+        Learning algorithm for DQN
+        """
         states, actions, rewards, next_states, dones = list(map(np.array, list(zip(*batch))))
 
+        # predict target q values 
         next_q_values = self.model.predict(next_states)
 
         is_not_done = np.logical_not(dones.reshape(len(batch), 1))  # Flip all Ts to Fs and Fs to Ts.
