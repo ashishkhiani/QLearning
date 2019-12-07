@@ -18,6 +18,9 @@ from parameters import \
 
 
 class Agent:
+    """
+    Abstract class that manages the different Q-Learning Algorithms discussed
+    """
 
     def __init__(self, observation_space, action_space):
         self.observation_space = observation_space
@@ -27,9 +30,14 @@ class Agent:
         self.model = self.build_model()
 
     def build_model(self):
+        """
+        Create the neural network architecture
+        """
         model = Sequential()
+        # input layer
         model.add(Dense(128, input_shape=self.observation_space.shape))
 
+        # hidden layers
         model.add(Dense(128, activation='relu'))
         model.add(Dropout(0.35))
         model.add(Dense(128, activation='relu'))
@@ -37,15 +45,23 @@ class Agent:
         model.add(Dense(128, activation='relu'))
         model.add(Dropout(0.35))
 
+        # output layer
         model.add(Dense(self.action_space.n, activation=None))
         model.compile(loss='mse', optimizer=Adam(lr=LEARNING_RATE))
+
         return model
 
     def predict_action(self, state):
+        """
+        Using the neural network, select action with highest Q-Value
+        """
         new_shape = (1,) + self.observation_space.shape
         return np.argmax(self.model.predict(state.reshape(new_shape)))
 
     def get_action(self, state):
+        """
+        Return action to be performed in current state
+        """
         if random.random() <= self.epsilon:
             # choose action via exploration
             return self.action_space.sample()
@@ -54,7 +70,9 @@ class Agent:
         return self.predict_action(state)
 
     def replay(self):
-
+        """
+        Sample replay buffer for a mini-batch
+        """
         if not self.replay_buffer.can_sample(REPLAY_BUFFER_SAMPLING_SIZE):
             return []
 
@@ -63,9 +81,15 @@ class Agent:
         return batch
 
     def remember(self, experience):
+        """
+        Add experience to the replay buffer
+        """
         self.replay_buffer.add(experience)
 
     def populate_buffer(self, env):
+        """
+        Initialize replay buffer with random actions until it reaches maximum capacity
+        """
         print('Populating buffer')
         current_state = env.reset()
         for i in range(REPLAY_BUFFER_CAPACITY):
@@ -80,16 +104,28 @@ class Agent:
 
     @abstractmethod
     def learn(self, batch):
+        """
+        Abstract method to be implemented by child class
+        """
         pass
 
     def decay_epsilon(self):
+        """
+        Reduce the value of epsilon linearly by the decay rate
+        """
         if self.epsilon > EPSILON_MIN:
             self.epsilon = max(EPSILON_MIN, self.epsilon * EPSILON_DECAY_RATE)
 
     def save_network(self, path):
+        """
+        Save neural network to file
+        """
         self.model.save(path)
         print("Successfully saved network.")
 
     def load_network(self, path):
+        """
+        Load neural network from file
+        """
         self.model = load_model(path)
         print("Succesfully loaded network.")
