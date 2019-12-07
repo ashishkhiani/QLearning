@@ -170,5 +170,8 @@ class QLearningDataHandler:
 
 
 handler = QLearningDataHandler()
+handler.plot_rewards()
+handler.plot_time_steps()
+handler.plot_epsilon_curve()
 handler.plot_loss_curve_dqn()
 handler.plot_loss_curve_double_dqn()
